@@ -1,13 +1,12 @@
 import {MapContainer, Marker, Popup, TileLayer, useMap} from "react-leaflet";
 import React, {useEffect, useState} from "react";
 import {useAtom} from "jotai";
-//import {Station, stationAtom} from "../core/atoms/stationAtom";
 import L, {LatLngTuple} from "leaflet";
 import {IonButton, IonContent} from "@ionic/react";
 import 'leaflet/dist/leaflet.css';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import {Geolocation} from '@capacitor/geolocation';
+import {Geolocation, Position} from '@capacitor/geolocation';
 import {combinedStationsAtom} from "../core/atoms/combinedStationAtom";
 import {Station} from "../core/atoms/stationAtom";
 
@@ -30,14 +29,30 @@ const redIcon = new L.DivIcon({
     iconAnchor: [12.5, 12.5],
 });
 
+const blueIcon = new L.DivIcon({
+    className: "custom-red-marker",
+    html: `
+        <div style="
+            background-color: blue;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        "></div>
+    `,
+    iconSize: [25, 25],
+    iconAnchor: [12.5, 12.5],
+});
+
+
 export const StationMap = () => {
 
-    const [stations] = useAtom(combinedStationsAtom); // Kombinierte Stationen aus CSV und manuell hinzugefügt
-
-    /*const [stationsState,] = useAtom(stationAtom); // `stations` ist jetzt vom Typ `Station[]`
+    const [stations] = useAtom(combinedStationsAtom);
+   /*const [stationsState,] = useAtom(stationAtom); // `stations` ist jetzt vom Typ `Station[]`
     const stations: Station[] = stationsState.data || [];*/
     const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
-
+    const [watchId, setWatchId] = useState<string | null>(null); // To store the watcher ID
 
     useEffect(() => {
         const fetchLocation = async () => {
@@ -53,10 +68,39 @@ export const StationMap = () => {
         };
 
         fetchLocation();
-    }, []);
 
 
-    const ZoomToLocationButton = ({position}: { position: { lat: number; lng: number } | null }) => {
+        const startWatching = async () => {
+            try {
+                const id = await Geolocation.watchPosition({}, (newPosition: Position | null, err?: any) => {
+                    if (err) {
+                        console.error("Error watching position:", err);
+                        return;
+                    }
+                    if (newPosition) {
+                        setPosition({
+                            lat: newPosition.coords.latitude,
+                            lng: newPosition.coords.longitude,
+                        });
+                    }
+                });
+                setWatchId(id); // Setze die Watcher-ID nach erfolgreichem Start
+            } catch (error) {
+                console.error("Error starting position watcher:", error);
+            }
+        };
+
+        startWatching();
+    // Cleanup function to clear the watcher when the component unmounts
+    return () => {
+        if (watchId) {
+            Geolocation.clearWatch({ id: watchId });
+        }
+    };
+}, []);
+
+
+const ZoomToLocationButton = ({position}: { position: { lat: number; lng: number } | null }) => {
         const map = useMap();
 
         const zoomToLocation = () => {
@@ -105,12 +149,10 @@ export const StationMap = () => {
                         if (isNaN(station.WGS84_LAT) || isNaN(station.WGS84_LON)) {
                             return null; //
                         }
-                        // Falls Latitude und Longitude vorhanden sind, setzen wir einen Marker
                         const position: LatLngTuple = [station.WGS84_LAT, station.WGS84_LON];
 
-                        // Es wird keine Filterung von ungültigen Koordinaten mehr gemacht
                         return (
-                            <Marker key={station.HALTESTELLEN_ID} position={position}>
+                            <Marker key={station.HALTESTELLEN_ID} position={position} icon={blueIcon}>
                                 <Popup>
                                     <strong>{station.NAME}</strong>
                                     <br/>
@@ -121,7 +163,6 @@ export const StationMap = () => {
                                     Longitude: {station.WGS84_LON}
                                 </Popup>
                             </Marker>
-
                         );
                     })}
 
@@ -131,7 +172,6 @@ export const StationMap = () => {
                         </Marker>
                     )}
                     <ZoomToLocationButton position={position}/>
-
 
                 </MapContainer>
 

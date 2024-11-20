@@ -2,7 +2,23 @@ import {IonContent, IonText} from "@ionic/react";
 import React from "react";
 import {MapContainer, Marker, Popup, TileLayer} from 'react-leaflet';
 import packageJson from '../../package.json';
+import L from "leaflet";
 
+const blueIcon = new L.DivIcon({
+    className: "custom-red-marker",
+    html: `
+        <div style="
+            background-color: blue;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        "></div>
+    `,
+    iconSize: [25, 25],
+    iconAnchor: [12.5, 12.5],
+});
 
 
 const developerInfo = {
@@ -41,7 +57,7 @@ export const DeveloperInfo = () => {
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
-                        <Marker position={[developerInfo.latitude, developerInfo.longitude]}>
+                        <Marker position={[developerInfo.latitude, developerInfo.longitude]} icon={blueIcon}>
                             <Popup>
                                 A pretty CSS3 popup. <br/> Easily customizable.
                             </Popup>

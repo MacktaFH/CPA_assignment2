@@ -8,8 +8,8 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import {Geolocation, Position} from '@capacitor/geolocation';
 import {addedStationsAtom} from "../core/atoms/addedStationAtom";
-import {loadStations} from "../core/storageStationService";
-import {Station} from "../core/apiStationService";
+import {loadStations} from "../core/stationStorageService";
+import {Station} from "../core/stationApiService";
 import {useHistory} from "react-router-dom";
 
 L.Icon.Default.mergeOptions({

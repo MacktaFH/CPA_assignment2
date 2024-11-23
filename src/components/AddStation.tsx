@@ -13,7 +13,7 @@ import {
 import { useHistory } from "react-router-dom";
 import { useAtom } from "jotai";
 import {addedStationsAtom } from "../core/atoms/addedStationAtom";
-import {Station} from "../core/apiStationService";
+import {Station} from "../core/stationApiService";
 
 export const AddStation: React.FC = () => {
     const [stations, setStations] = useAtom(addedStationsAtom);

@@ -4,8 +4,8 @@ import { IonButton, IonContent, IonHeader, IonItem, IonLabel, IonList, IonLoadin
 import SaveAddedStations from "./SaveAddedStations";
 import {addedStationsAtom} from "../core/atoms/addedStationAtom";
 import {useAtom} from "jotai";
-import {loadStations} from "../core/storageStationService";
-import {Station} from "../core/apiStationService";
+import {loadStations} from "../core/stationStorageService";
+import {Station} from "../core/stationApiService";
 
 export const StationList: React.FC = () => {
     const [stations, setStations] = useState<Station[]>([]);

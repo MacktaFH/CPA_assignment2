@@ -1,5 +1,5 @@
 import store from "./storage-setup";
-import {loadStationsFromApi, Station} from "./apiStationService";
+import {loadStationsFromApi, Station} from "./stationApiService";
 
 export const loadStations = async (): Promise<Station[]> => {
     try {

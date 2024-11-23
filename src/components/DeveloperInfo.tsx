@@ -50,8 +50,13 @@ export const DeveloperInfo = () => {
                     <MapContainer
                         center={[developerInfo.latitude, developerInfo.longitude]}
                         zoom={13}
-                        scrollWheelZoom={false}// Initial zoom level
-                        style={{height: '100%', width: '100%'}}  // Full height and width
+                        scrollWheelZoom={false}
+                        style={{height: '100%', width: '100%'}}
+                        ref={(mapRef)=> {
+                            setTimeout(() => {
+                                mapRef?.invalidateSize();
+                            }, 0);
+                        }}
                     >
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

@@ -49,8 +49,8 @@ const blueIcon = new L.DivIcon({
 export const StationMap = () => {
 
     const [stations] = useAtom(combinedStationsAtom);
-   /*const [stationsState,] = useAtom(stationAtom); // `stations` ist jetzt vom Typ `Station[]`
-    const stations: Station[] = stationsState.data || [];*/
+    /*const [stationsState,] = useAtom(stationAtom); // `stations` ist jetzt vom Typ `Station[]`
+     const stations: Station[] = stationsState.data || [];*/
     const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
     const [watchId, setWatchId] = useState<string | null>(null); // To store the watcher ID
 
@@ -91,16 +91,16 @@ export const StationMap = () => {
         };
 
         startWatching();
-    // Cleanup function to clear the watcher when the component unmounts
-    return () => {
-        if (watchId) {
-            Geolocation.clearWatch({ id: watchId });
-        }
-    };
-}, []);
+        // Cleanup function to clear the watcher when the component unmounts
+        return () => {
+            if (watchId) {
+                Geolocation.clearWatch({id: watchId});
+            }
+        };
+    }, []);
 
 
-const ZoomToLocationButton = ({position}: { position: { lat: number; lng: number } | null }) => {
+    const ZoomToLocationButton = ({position}: { position: { lat: number; lng: number } | null }) => {
         const map = useMap();
 
         const zoomToLocation = () => {
@@ -120,7 +120,7 @@ const ZoomToLocationButton = ({position}: { position: { lat: number; lng: number
                     top: "10px",
                     left: "50%",
                     transform: "translateX(-50%)",
-                    zIndex: 1000, // Ensure the button appears above the map
+                    zIndex: 1000,
                 }}
             >
                 Zoom zu meiner Position
@@ -128,7 +128,6 @@ const ZoomToLocationButton = ({position}: { position: { lat: number; lng: number
         );
     };
 
-    // Prevent rendering map until position is available
     if (!position) {
         return <p>Position wird abgerufen...</p>;
     }
@@ -138,8 +137,13 @@ const ZoomToLocationButton = ({position}: { position: { lat: number; lng: number
                 <MapContainer
                     center={[48.2081, 16.3713]}
                     zoom={13}
-                    scrollWheelZoom={false}// Initial zoom level
-                    style={{height: '100vh', width: '100%'}}  // Full height and width
+                    scrollWheelZoom={false}
+                    style={{height: '100vh', width: '100%'}}
+                    ref={(mapRef) => {
+                        setTimeout(() => {
+                            mapRef?.invalidateSize();
+                        }, 0);
+                    }}
                 >
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

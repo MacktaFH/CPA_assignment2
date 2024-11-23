@@ -13,10 +13,10 @@ import {
 import { useHistory } from "react-router-dom";
 import { useAtom } from "jotai";
 import {addedStationsAtom } from "../core/atoms/addedStationAtom";
-import {Station} from "../core/atoms/stationAtom";
+import {Station} from "../core/apiStationService";
 
 export const AddStation: React.FC = () => {
-    const [stations, setStations] = useAtom(addedStationsAtom); // Hole den aktuellen Zustand aus atomWithQuery
+    const [stations, setStations] = useAtom(addedStationsAtom);
 
     const [newStation, setNewStation] = useState({
         id: "",
@@ -27,19 +27,18 @@ export const AddStation: React.FC = () => {
     const [showAlert, setShowAlert] = useState(false);
     const history = useHistory();
 
-    // Validierungslogik für die Eingabedaten
+
     const validateInput = (): boolean => {
         if (!newStation.id || !newStation.name || !newStation.lat || !newStation.lon) {
-            return false; // Alle Felder müssen ausgefüllt sein
+            return false;
         }
         return true;
     };
 
     const handleSubmit = () => {
         if (validateInput()) {
-            // Station zur Liste der manuellen Stationen hinzufügen
             const updatedStations: Station[] = [
-                ...stations, // Alle bestehenden manuell hinzugefügten Stationen
+                ...stations,
                 {
                     HALTESTELLEN_ID: newStation.id,
                     NAME: newStation.name,
@@ -48,13 +47,11 @@ export const AddStation: React.FC = () => {
                 },
             ];
 
-            // Aktualisiere die manuell hinzugefügten Stationen
             setStations(updatedStations);
 
-            // Nach dem Hinzufügen zurück zur StationList-Seite
             history.push("/tab1");
         } else {
-            setShowAlert(true); // Falls Eingaben ungültig sind
+            setShowAlert(true);
         }
     };
 

@@ -1,4 +1,4 @@
 import { atom } from 'jotai';
-import {Station} from "./stationAtom";
+import {Station} from "../apiStationService";
 
-export const addedStationsAtom = atom<Station[]>([]);  // Atom für manuell hinzugefügte Stationen
+export const addedStationsAtom = atom<Station[]>([]);

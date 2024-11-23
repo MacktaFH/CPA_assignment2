@@ -7,8 +7,10 @@ import 'leaflet/dist/leaflet.css';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import {Geolocation, Position} from '@capacitor/geolocation';
-import {combinedStationsAtom} from "../core/atoms/combinedStationAtom";
-import {Station} from "../core/atoms/stationAtom";
+import {addedStationsAtom} from "../core/atoms/addedStationAtom";
+import {loadStations} from "../core/storageStationService";
+import {Station} from "../core/apiStationService";
+import {useHistory} from "react-router-dom";
 
 L.Icon.Default.mergeOptions({
     iconUrl: markerIcon,
@@ -47,12 +49,29 @@ const blueIcon = new L.DivIcon({
 
 
 export const StationMap = () => {
-
-    const [stations] = useAtom(combinedStationsAtom);
-    /*const [stationsState,] = useAtom(stationAtom); // `stations` ist jetzt vom Typ `Station[]`
-     const stations: Station[] = stationsState.data || [];*/
     const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
     const [watchId, setWatchId] = useState<string | null>(null); // To store the watcher ID
+    const [stations, setStations] = useState<Station[]>([]); // Stations im lokalen Zustand speichern
+    const [loading, setLoading] = useState<boolean>(false); // Ladezustand verwalten
+    const [addedStations] = useAtom(addedStationsAtom);
+    const history = useHistory();
+
+    const loadStationData = async () => {
+        setLoading(true);
+        try {
+            const stationData = await loadStations();
+            setStations(stationData);
+        } catch (error) {
+            console.error("Fehler beim Laden der Stationen:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadStationData();
+    }, []);
+
 
     useEffect(() => {
         const fetchLocation = async () => {
@@ -84,14 +103,14 @@ export const StationMap = () => {
                         });
                     }
                 });
-                setWatchId(id); // Setze die Watcher-ID nach erfolgreichem Start
+                setWatchId(id);
             } catch (error) {
                 console.error("Error starting position watcher:", error);
             }
         };
 
         startWatching();
-        // Cleanup function to clear the watcher when the component unmounts
+
         return () => {
             if (watchId) {
                 Geolocation.clearWatch({id: watchId});
@@ -105,7 +124,7 @@ export const StationMap = () => {
 
         const zoomToLocation = () => {
             if (position) {
-                map.flyTo([position.lat, position.lng], 13); // Adjust zoom level as needed
+                map.flyTo([position.lat, position.lng], 13);
             } else {
                 console.warn('Position is not available yet.');
             }
@@ -131,6 +150,9 @@ export const StationMap = () => {
     if (!position) {
         return <p>Position wird abgerufen...</p>;
     }
+
+    const allStations = [...stations, ...addedStations];
+
     return (
         <IonContent>
             <div style={{height: '100vh', width: '100%'}}>
@@ -149,7 +171,7 @@ export const StationMap = () => {
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    {stations.map((station: Station) => {
+                    {allStations.map((station: Station) => {
                         if (isNaN(station.WGS84_LAT) || isNaN(station.WGS84_LON)) {
                             return null; //
                         }
